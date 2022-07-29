@@ -25,7 +25,7 @@ fn show_as_chars(chararr: &mut Vec<char>) {
 }
 
 
-fn dump_bytes(vec: Vec<u8>) {
+fn dump_bytes(vec: Vec<u8>, use_fileoffset: bool) {
     let mut tochar_array: Vec<char> = Vec::new();
     let mut file_offset = 0;
 
@@ -33,7 +33,10 @@ fn dump_bytes(vec: Vec<u8>) {
         if i % 8 == 0 {
             show_as_chars(&mut tochar_array);
             print!("\n");
-            print!("[0x0{:06x}] ", file_offset);
+
+            if use_fileoffset {
+                print!("[0x0{:06x}] ", file_offset);
+            }
         } 
 
         print!("0x0{:02x} ", vec[i]);
@@ -58,9 +61,16 @@ fn main() -> io::Result<()>{
         println!("OOPS!: Please pass in a filename of the file to dump!");
         return Ok(())
     }
+    
+    let mut use_file_offset = true;
 
     for i in 1..args.len() {
-        dump_bytes(read_bytes(&args[i])?);
+        if args[i] == "--no-foff" {
+            use_file_offset = false;
+            continue;
+        }
+
+        dump_bytes(read_bytes(&args[i])?, use_file_offset);
     }
     
     Ok(())
